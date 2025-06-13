@@ -30,13 +30,51 @@ function Login() {
     if (!validate()) return
     setLoading(true)
     try {
+      // First, ensure we clear any old data
+      localStorage.removeItem('email')
+      localStorage.removeItem('username')
+      localStorage.removeItem('role')
+      localStorage.removeItem('token')
+      
+      // Always store the email from the form first as a fallback
+      localStorage.setItem('email', formData.email)
+      
       const res = await axios.post('http://localhost:5000/api/auth/login', formData)
-      const { token, role, username } = res.data
+      console.log("Login response:", res.data)
+      
+      // Extract data from response
+      const { token, username, role, email } = res.data
+      
+      // Store user data in localStorage
       localStorage.setItem('token', token)
-      localStorage.setItem('role', role)
-      localStorage.setItem('username', username)
-      navigate('/dashboard')
+      localStorage.setItem('role', role || '')
+      localStorage.setItem('username', username || '')
+      
+      // Make sure email is set, with fallbacks
+      if (email) {
+        localStorage.setItem('email', email)
+      } else if (!localStorage.getItem('email')) {
+        localStorage.setItem('email', formData.email)
+      }
+      
+      // Double-check what was stored
+      const storedEmail = localStorage.getItem('email')
+      console.log("Final stored email:", storedEmail)
+      
+      // Log what was stored
+      console.log("Stored in localStorage:", {
+        token,
+        role: localStorage.getItem('role'),
+        username: localStorage.getItem('username'),
+        email: localStorage.getItem('email')
+      })
+      
+      // Force a small delay to ensure localStorage is updated
+      setTimeout(() => {
+        navigate('/dashboard')
+      }, 100)
     } catch (err) {
+      console.error("Login error:", err)
       setApiError(err.response?.data?.message || 'Login failed.')
     } finally {
       setLoading(false)

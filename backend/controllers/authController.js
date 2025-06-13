@@ -56,7 +56,20 @@ const login = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.status(200).json({ token, user: { username: user.username, role: user.role } });
+    // Log the user data being sent
+    console.log("Sending user data:", {
+      username: user.username,
+      role: user.role,
+      email: user.email
+    });
+    
+    // Send user data directly in the response for easier access
+    res.status(200).json({ 
+      token,
+      username: user.username,
+      role: user.role,
+      email: user.email
+    });
 
   } catch (err) {
     console.error("Login error:", err);

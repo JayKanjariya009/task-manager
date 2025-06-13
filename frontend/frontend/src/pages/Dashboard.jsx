@@ -12,6 +12,7 @@ function Dashboard() {
   const [editTask, setEditTask] = useState(null);
   const [error, setError] = useState("");
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
   const fetchTasks = async () => {
@@ -34,6 +35,7 @@ function Dashboard() {
   useEffect(() => {
     fetchTasks();
     setUsername(localStorage.getItem("username") || "");
+    setEmail(localStorage.getItem("email") || "");
     // eslint-disable-next-line
   }, []);
 
@@ -125,6 +127,7 @@ function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-indigo-800 mb-2">Welcome back, {username}!</h1>
+          <p className="text-gray-600">Logged in as: {email}</p>
           <p className="text-gray-600">Here's an overview of your tasks</p>
         </div>
         
