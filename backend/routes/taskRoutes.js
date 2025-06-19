@@ -8,8 +8,8 @@ const {
   deleteTask
 } = require("../controllers/taskController");
 
-const {adminMiddleware} = require("../middeware/adminmiddleware")
-const { authMiddleware } = require("../middeware/authmiddleware");
+const {adminMiddleware} = require("../middleware/adminMiddleware")
+const { authMiddleware } = require("../middleware/authmiddleware");
 
 router.use(authMiddleware);
 
