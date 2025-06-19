@@ -4,6 +4,8 @@ import axios from "axios";
 import TaskCard from "../components/TaskCard";
 import Header from "../components/Header";
 import TaskForm from "../components/TaskForm";
+import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
   const [tasks, setTasks] = useState([]);
@@ -14,11 +16,16 @@ function Dashboard() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const navigate = useNavigate();
 
   const fetchTasks = async () => {
     setLoading(true);
     setError("");
     const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return null; // Prevent rendering if not authenticated       
+    }
     try {
       const res = await axios.get("http://localhost:5000/api/tasks", {
         headers: { Authorization: `Bearer ${token}` },
@@ -41,6 +48,10 @@ function Dashboard() {
 
   const handleCreate = async (data) => {
     const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return null; // Prevent rendering if not authenticated       
+    }
     try {
       await axios.post("http://localhost:5000/api/tasks", data, {
         headers: { Authorization: `Bearer ${token}` },
@@ -54,6 +65,10 @@ function Dashboard() {
 
   const handleUpdate = async (data) => {
     const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return null; // Prevent rendering if not authenticated       
+    }
     try {
       await axios.put(`http://localhost:5000/api/tasks/${editTask._id}`, data, {
         headers: { Authorization: `Bearer ${token}` },
@@ -68,6 +83,10 @@ function Dashboard() {
 
   const handleDelete = async (id) => {
     const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return null; // Prevent rendering if not authenticated       
+    }
     try {
       await axios.delete(`http://localhost:5000/api/tasks/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -84,53 +103,53 @@ function Dashboard() {
     const completed = tasks.filter(task => task.status === "Completed").length;
     const inProgress = tasks.filter(task => task.status === "In Progress").length;
     const pending = tasks.filter(task => task.status === "Pending").length;
-    
+
     // Find overdue tasks (due date is in the past and not completed)
     const overdue = tasks.filter(task => {
       if (task.status === "Completed") return false;
       if (!task.dueDate) return false;
-      
+
       const dueDate = new Date(task.dueDate);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       return dueDate < today;
     }).length;
-    
+
     // Find tasks due today
     const dueToday = tasks.filter(task => {
       if (task.status === "Completed") return false;
       if (!task.dueDate) return false;
-      
+
       const dueDate = new Date(task.dueDate);
       const today = new Date();
-      
-      return dueDate.getDate() === today.getDate() && 
-             dueDate.getMonth() === today.getMonth() && 
-             dueDate.getFullYear() === today.getFullYear();
+
+      return dueDate.getDate() === today.getDate() &&
+        dueDate.getMonth() === today.getMonth() &&
+        dueDate.getFullYear() === today.getFullYear();
     }).length;
-    
+
     return { total, completed, inProgress, pending, overdue, dueToday };
   };
 
   const stats = getTaskStats();
 
   // Filter tasks based on status
-  const filteredTasks = filterStatus === "all" 
-    ? tasks 
+  const filteredTasks = filterStatus === "all"
+    ? tasks
     : tasks.filter(task => task.status === filterStatus);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-indigo-800 mb-2">Welcome back, {username}!</h1>
           <p className="text-gray-600">Logged in as: {email}</p>
           <p className="text-gray-600">Here's an overview of your tasks</p>
         </div>
-        
+
         {/* Task Statistics */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
           <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-indigo-500">
@@ -158,31 +177,31 @@ function Dashboard() {
             <p className="text-2xl font-bold text-blue-700">{stats.dueToday}</p>
           </div>
         </div>
-        
+
         {/* Task Controls */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div className="flex items-center">
             <h2 className="text-2xl font-semibold text-indigo-800 mr-4">Your Tasks</h2>
             <div className="flex items-center bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <button 
+              <button
                 className={`px-3 py-2 text-sm ${filterStatus === 'all' ? 'bg-indigo-100 text-indigo-800 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
                 onClick={() => setFilterStatus('all')}
               >
                 All
               </button>
-              <button 
+              <button
                 className={`px-3 py-2 text-sm ${filterStatus === 'Pending' ? 'bg-indigo-100 text-indigo-800 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
                 onClick={() => setFilterStatus('Pending')}
               >
                 Pending
               </button>
-              <button 
+              <button
                 className={`px-3 py-2 text-sm ${filterStatus === 'In Progress' ? 'bg-indigo-100 text-indigo-800 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
                 onClick={() => setFilterStatus('In Progress')}
               >
                 In Progress
               </button>
-              <button 
+              <button
                 className={`px-3 py-2 text-sm ${filterStatus === 'Completed' ? 'bg-indigo-100 text-indigo-800 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
                 onClick={() => setFilterStatus('Completed')}
               >
@@ -190,7 +209,7 @@ function Dashboard() {
               </button>
             </div>
           </div>
-          
+
           <button
             className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-md flex items-center"
             onClick={() => { setEditTask(null); setShowForm(true); }}
@@ -201,7 +220,7 @@ function Dashboard() {
             Create New Task
           </button>
         </div>
-        
+
         {showForm && (
           <div className="mb-8">
             <TaskForm
@@ -211,7 +230,7 @@ function Dashboard() {
             />
           </div>
         )}
-        
+
         {!showForm && (
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {loading ? (
@@ -259,8 +278,8 @@ function Dashboard() {
                 </svg>
                 <p className="text-gray-500 text-lg mb-2">No tasks found</p>
                 <p className="text-gray-400 mb-4">
-                  {filterStatus !== 'all' 
-                    ? `You don't have any ${filterStatus.toLowerCase()} tasks.` 
+                  {filterStatus !== 'all'
+                    ? `You don't have any ${filterStatus.toLowerCase()} tasks.`
                     : "You don't have any tasks yet."}
                 </p>
                 <button
